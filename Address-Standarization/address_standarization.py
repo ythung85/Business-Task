@@ -7,7 +7,8 @@ test = pd.read_csv('street.csv')
 test.head()
 
 # Creating mapping Dict
-common_abbre = {'apartment' :'apt', 
+common_abbre = {'apartment' :'apt',
+'#' : 'apt',
 'avenue' : 'ave',
 'boulevard' : 'blvd',
 'building' : 'bldg',
@@ -95,7 +96,7 @@ def address_standard(df, Dict1, Dict2):
         
         
         if sep[-1].isnumeric():
-            if sep[-2] == '#':
+            if sep[-2] == '#' and sep[-3] == 'apt':
                 sep.pop(-2)
             Object = sep[-2].lower()
             if Object in Dict1.keys():
@@ -132,7 +133,20 @@ def address_standard(df, Dict1, Dict2):
             
             
         res.append(' '.join(sep))
-    df['corret_address'] = res
+    df['correct_address'] = res
+    
+    ## second analysis
+    missing_address = df[df['correct_address'] == '** missing address type **'].reset_index(drop=True)
+    correct_sec = []
+    for i in range(len(missing_address)):
+        sep = missing_address['Address'][i].split(' ')
+        if sep[0].isnumeric() and len(sep) > 1:
+            if sep[-2] == '#' and sep[-1].isnumeric():
+                sep[-2] = common_abbre[sep[-2]]
+            else:
+                sep = list(map(lambda x: x.lower(), sep))
+            correct_sec.append(' '.join(sep))
+
     return df
 
 # Display clean data
