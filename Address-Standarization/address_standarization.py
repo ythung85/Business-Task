@@ -93,6 +93,9 @@ def address_standard(df, Dict1, Dict2):
             if 'box' in lower or 'po' in lower:
                 res.append(' '.join(sep))
                 continue
+            else:
+                res.append('** entity name **')
+                continue
         
         
         if sep[-1].isnumeric():
@@ -105,8 +108,16 @@ def address_standard(df, Dict1, Dict2):
                 sep[-2] = sep[-2].lower()
                 pass
             else:
-                res.append('** missing address type **')
-                continue
+                if sep[0].isnumeric() and len(sep) > 1:
+                    if sep[-2] == '#' and sep[-1].isnumeric():
+                        sep[-2] = common_abbre[sep[-2]]
+                    else:
+                        sep = list(map(lambda x: x.lower(), sep))
+                    if sep[-1] in common_abbre.values():
+                        sep.pop(-1)
+                        
+                    res.append(' '.join(sep))
+                    continue
         else:
             Object = sep[-1].lower()
             if Object in Dict1.keys():
@@ -114,8 +125,15 @@ def address_standard(df, Dict1, Dict2):
             elif Object in Dict1.values():
                 sep[-1] = sep[-1].lower()
             else:
-                res.append('** missing address type **')
-                continue
+                if sep[0].isnumeric() and len(sep) > 1:
+                    if sep[-2] == '#' and sep[-1].isnumeric():
+                        sep[-2] = common_abbre[sep[-2]]
+                    else:
+                        sep = list(map(lambda x: x.lower(), sep))
+                    if sep[-1] in common_abbre.values():
+                        sep.pop(-1)
+                    res.append(' '.join(sep))
+                    continue
         ## above works
         
         for i in range(1, len(sep)-1):
@@ -131,23 +149,14 @@ def address_standard(df, Dict1, Dict2):
             if Object in Dict2.keys():
                 sep[i] = Dict2[Object]
             
+        if sep[-1] in common_abbre.values():
+            sep.pop(-1)
             
         res.append(' '.join(sep))
     df['correct_address'] = res
     
-    ## second analysis
-    missing_address = df[df['correct_address'] == '** missing address type **'].reset_index(drop=True)
-    correct_sec = []
-    for i in range(len(missing_address)):
-        sep = missing_address['Address'][i].split(' ')
-        if sep[0].isnumeric() and len(sep) > 1:
-            if sep[-2] == '#' and sep[-1].isnumeric():
-                sep[-2] = common_abbre[sep[-2]]
-            else:
-                sep = list(map(lambda x: x.lower(), sep))
-            correct_sec.append(' '.join(sep))
-
     return df
+
 
 # Display clean data
 result = address_standard(test, common_abbre, Number)
