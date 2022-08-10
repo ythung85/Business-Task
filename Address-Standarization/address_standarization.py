@@ -93,6 +93,8 @@ def address_standard(df, Dict1, Dict2):
             if 'box' in lower or 'po' in lower:
                 res.append(' '.join(sep))
                 continue
+            elif '-' in sep[0]:
+                pass
             else:
                 res.append('** entity name **')
                 continue
@@ -151,7 +153,7 @@ def address_standard(df, Dict1, Dict2):
             
         if sep[-1] in common_abbre.values():
             sep.pop(-1)
-            
+        
         res.append(' '.join(sep))
     df['correct_address'] = res
     
